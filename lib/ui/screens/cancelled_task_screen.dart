@@ -37,7 +37,7 @@ class _CancelledTaskScreenState extends State<CancelledTaskScreen> {
               primary: false,
               itemCount: 10,
             itemBuilder: (context, index) {
-                return const TaskItemWidget();
+                // return const TaskItemWidget();
             },
           );
   }

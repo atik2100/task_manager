@@ -37,7 +37,7 @@ class _CompletedTaskScreenState extends State<CompletedTaskScreen> {
               primary: false,
               itemCount: 10,
             itemBuilder: (context, index) {
-                return const TaskItemWidget();
+                // return const TaskItemWidget();
             },
           );
   }
