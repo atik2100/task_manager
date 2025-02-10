@@ -4,6 +4,7 @@ import 'package:task_manager/data/models/task_count_model.dart';
 import 'package:task_manager/data/models/task_list_by_status_model.dart';
 import 'package:task_manager/data/services/network_caller.dart';
 import 'package:task_manager/data/utils/urls.dart';
+import 'package:task_manager/ui/controller/auth_controller.dart';
 import 'package:task_manager/ui/screens/add_new_task_screen.dart';
 import 'package:task_manager/ui/widgets/background.dart';
 import 'package:task_manager/ui/widgets/centered_circular_progress_bar.dart';
@@ -113,6 +114,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     if (response.isSuccess) {
       taskCountByStatusModel =
           TaskCountByStatusModel.fromJson(response.responseData!);
+
     } else {
       showSnackBarMassage(context, response.errorMassage);
     }

@@ -1,9 +1,14 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:task_manager/data/services/network_caller.dart';
+import 'package:task_manager/data/utils/urls.dart';
 import 'package:task_manager/ui/screens/sign_in_screen.dart';
 import 'package:task_manager/ui/utils/app_colors.dart';
+import 'package:task_manager/ui/utils/global_string.dart';
 import 'package:task_manager/ui/widgets/background.dart';
+import 'package:task_manager/ui/widgets/centered_circular_progress_bar.dart';
+import 'package:task_manager/ui/widgets/snack_bar_massege.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -15,9 +20,10 @@ class ResetPasswordScreen extends StatefulWidget {
 }
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
-  final TextEditingController _newPassword = TextEditingController();
-  final TextEditingController _confirmNewPassword = TextEditingController();
+  final TextEditingController _newPasswordTEController = TextEditingController();
+  final TextEditingController _confirmNewPasswordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _resetPasswordInProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -46,23 +52,46 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   const SizedBox(height: 24),
 
                   TextFormField(
-                    controller: _newPassword,
+                    controller: _newPasswordTEController,
                     decoration: const InputDecoration(
                       hintText: "New Password"
                     ),
+                    validator: (String? value){
+                      if (value?.trim().isEmpty ?? true){
+                        return "Enter New Password";
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
-                    controller: _confirmNewPassword,
+                    controller: _confirmNewPasswordTEController,
                     decoration: const InputDecoration(
                       hintText: "Confirm New Password"
                     ),
+                    validator: (String? value){
+                      if (value?.trim().isEmpty ?? true){
+                        return "Enter Confirm Password";
+                      }
+                      return null;
+                    },
                   ),
 
                   const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: const Text("Confirm"),
+                  Visibility(
+                    visible: _resetPasswordInProgress == false,
+                    replacement: const CenteredCircularProgressBar(),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if(_newPasswordTEController.text.trim() == _confirmNewPasswordTEController.text.trim()){
+                          _resetPassword();
+                        } else {
+                          showSnackBarMassage(context, "New Password and Confirm Password Not Match");
+                        }
+
+                      },
+                      child: const Text("Confirm"),
+                    ),
                   ),
                   const SizedBox(height: 48),
                   Center(
@@ -101,10 +130,36 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     );
   }
 
+  Future<void> _resetPassword() async{
+    if(_formKey.currentState!.validate()){
+      _resetPasswordInProgress = true;
+      setState(() { });
+      Map<String, dynamic> requestBody = {
+        "email":GlobalString.email,
+        "OTP":GlobalString.otp,
+        "password":_confirmNewPasswordTEController.text.trim(),
+      };
+
+      final NetworkResponse response = await NetworkCaller.postRequest(url: Urls.recoverResetPassUrl,body: requestBody);
+      if(response.responseData!["status"] == "success"){
+        Navigator.pushReplacementNamed(context, SignInScreen.name);
+        
+      } else if(response.responseData!["status"] == "fail"){
+        showSnackBarMassage(context, "Invalid Request!!!!");
+      } else{
+        showSnackBarMassage(context, response.errorMassage);
+      }
+
+      _resetPasswordInProgress = false;
+      setState(() { });
+
+    }
+  }
+
   @override
   void dispose() {
-    _newPassword.dispose();
-    _confirmNewPassword.dispose();
+    _newPasswordTEController.dispose();
+    _confirmNewPasswordTEController.dispose();
     super.dispose();
   }
 }
