@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
+import 'package:task_manager/app.dart';
 import 'package:task_manager/ui/controller/auth_controller.dart';
+import 'package:task_manager/ui/screens/sign_in_screen.dart';
 
 class NetworkResponse {
   final int statusCode;
@@ -18,6 +20,7 @@ class NetworkResponse {
 }
 
 class NetworkCaller {
+  static bool _isLogOut = false;
   static Future<NetworkResponse> getRequest({required String url}) async {
     try {
       Uri uri = Uri.parse(url);
@@ -34,6 +37,13 @@ class NetworkCaller {
             isSuccess: true,
             statusCode: response.statusCode,
             responseData: decodedResponse);
+      } else if (response.statusCode == 401){
+        if (!_isLogOut) {
+          _logout();
+        }
+        return NetworkResponse(
+            isSuccess: false, statusCode: response.statusCode);
+
       } else {
         return NetworkResponse(
             isSuccess: false, statusCode: response.statusCode);
@@ -67,6 +77,13 @@ class NetworkCaller {
             isSuccess: true,
             statusCode: response.statusCode,
             responseData: decodedResponse);
+      } else if (response.statusCode == 401){
+        if (!_isLogOut) {
+          _logout();
+        }
+        return NetworkResponse(
+            isSuccess: false, statusCode: response.statusCode);
+
       } else {
         return NetworkResponse(
             isSuccess: false, statusCode: response.statusCode);
@@ -78,5 +95,13 @@ class NetworkCaller {
         errorMassage: e.toString(),
       );
     }
+  }
+
+  static Future<void> _logout() async{
+    if(_isLogOut) return;
+
+    _isLogOut = true;
+    await AuthController.clearUserData();
+    Navigator.pushNamedAndRemoveUntil(TaskManager.navigatorKey.currentContext!, SignInScreen.name, (predicate)=>false);
   }
 }

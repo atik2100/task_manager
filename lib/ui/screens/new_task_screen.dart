@@ -22,7 +22,7 @@ class NewTaskScreen extends StatefulWidget {
 class _NewTaskScreenState extends State<NewTaskScreen> {
   bool _getTaskCountByStatusInProgress = false;
   bool _getNewTaskListInProgress = false;
-  
+
   TaskCountByStatusModel? taskCountByStatusModel;
   TaskListByStatusModel? newTaskListModel;
 
@@ -33,10 +33,14 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     _getNewTaskList();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const TmAppBar(),
+      appBar: TmAppBar(onRefresh: () {
+        _getTaskCountByStatus();
+        _getNewTaskList();
+      }),
       body: Background(
         child: SingleChildScrollView(
           child: Column(children: [
@@ -64,9 +68,12 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     return ListView.builder(
       shrinkWrap: true,
       primary: false,
-      itemCount: newTaskListModel?.taskList?.length?? 0,
+      itemCount: newTaskListModel?.taskList?.length ?? 0,
       itemBuilder: (context, index) {
-        return TaskItemWidget(taskModel: newTaskListModel!.taskList![index]);
+        return TaskItemWidget(
+          taskModel: newTaskListModel!.taskList![index],
+
+        );
       },
     );
   }
@@ -81,8 +88,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
           height: 100,
           child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount:
-                  taskCountByStatusModel?.taskByStatusList?.length ?? 0,
+              itemCount: taskCountByStatusModel?.taskByStatusList?.length ?? 0,
               itemBuilder: (context, index) {
                 final TaskCountModel model =
                     taskCountByStatusModel!.taskByStatusList![index];
@@ -115,19 +121,20 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
   }
 
   Future<void> _getNewTaskList() async {
+
     _getNewTaskListInProgress = true;
     setState(() {});
 
     final NetworkResponse response =
-    await NetworkCaller.getRequest(url: Urls.taskListByStatusUrl("New"));
+        await NetworkCaller.getRequest(url: Urls.taskListByStatusUrl("New"));
 
     if (response.isSuccess) {
-      newTaskListModel =
-          TaskListByStatusModel.fromJson(response.responseData!);
+      newTaskListModel = TaskListByStatusModel.fromJson(response.responseData!);
     } else {
       showSnackBarMassage(context, response.errorMassage);
     }
     _getNewTaskListInProgress = false;
     setState(() {});
+
   }
 }

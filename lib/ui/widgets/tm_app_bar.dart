@@ -1,14 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:task_manager/data/services/network_caller.dart';
+import 'package:task_manager/data/utils/urls.dart';
 import 'package:task_manager/ui/controller/auth_controller.dart';
+import 'package:task_manager/ui/screens/new_task_screen.dart';
 import 'package:task_manager/ui/screens/sign_in_screen.dart';
 import 'package:task_manager/ui/screens/update_profile_screen.dart';
 
 import '../utils/app_colors.dart';
 
 class TmAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final VoidCallback? onRefresh;
   const TmAppBar({
     super.key,
-    this.fromUpdateProfileScreen = false,
+    this.fromUpdateProfileScreen = false, this.onRefresh,
   });
   final bool fromUpdateProfileScreen;
 
@@ -19,8 +25,12 @@ class TmAppBar extends StatelessWidget implements PreferredSizeWidget {
         backgroundColor: AppColors.themeColor,
         title: Row(
           children: [
-            const CircleAvatar(
+             CircleAvatar(
               radius: 16,
+               backgroundImage: MemoryImage(
+                base64Decode(AuthController.userModel?.photo ?? ""),
+              ),
+               onBackgroundImageError: (_,__) => const Icon(Icons.person_outlined),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -56,10 +66,18 @@ class TmAppBar extends StatelessWidget implements PreferredSizeWidget {
               },
               icon: const Icon(Icons.logout_outlined),
             ),
+            IconButton(
+              style: IconButton.styleFrom(
+                foregroundColor: Colors.white,
+              ),
+              onPressed: onRefresh ,
+              icon: const Icon(Icons.refresh_outlined),
+            ),
           ],
         ));
   }
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
 }
