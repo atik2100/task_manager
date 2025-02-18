@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manager/data/models/task_count_by_status_model.dart';
 import 'package:task_manager/data/models/task_count_model.dart';
 import 'package:task_manager/data/models/task_list_by_status_model.dart';
@@ -58,7 +59,8 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, AddNewTaskScreen.name);
+          // Navigator.pushNamed(context, AddNewTaskScreen.name);
+          Get.toNamed(AddNewTaskScreen.name);
         },
         child: const Icon(Icons.add),
       ),

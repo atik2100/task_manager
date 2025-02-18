@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:task_manager/controller_binder.dart';
 import 'package:task_manager/ui/screens/add_new_task_screen.dart';
 import 'package:task_manager/ui/screens/forget_password_verify_email_screen.dart';
 import 'package:task_manager/ui/screens/forget_password_verify_otp_screen.dart';
@@ -17,9 +19,10 @@ class TaskManager extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: "Task Manager",
       initialRoute: '/',
+      initialBinding: ControllerBinder(),
       navigatorKey: navigatorKey,
       theme: ThemeData(
         colorSchemeSeed: AppColors.themeColor,

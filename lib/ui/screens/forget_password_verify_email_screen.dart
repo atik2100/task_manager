@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manager/data/services/network_caller.dart';
 import 'package:task_manager/data/utils/urls.dart';
 import 'package:task_manager/ui/screens/forget_password_verify_otp_screen.dart';
@@ -104,7 +105,8 @@ class _ForgetPasswordVerifyEmailScreenState extends State<ForgetPasswordVerifyEm
                 color: AppColors.themeColor,
               ),
               recognizer: TapGestureRecognizer()..onTap = () {
-                Navigator.pop(context);
+                // Navigator.pop(context);
+                Get.back();
               },
             ),
           ]),
@@ -121,8 +123,11 @@ class _ForgetPasswordVerifyEmailScreenState extends State<ForgetPasswordVerifyEm
       final NetworkResponse response = await NetworkCaller.getRequest(url: Urls.recoverVerifyEmailUrl(GlobalString.email));
       if(response.responseData!["status"] == "success"){
         showSnackBarMassage(context, "Please Check Your Email!");
-        Navigator.pushNamed(
-            context, ForgetPasswordVerifyOTPScreen.name);
+        /*Navigator.pushNamed(
+            context, ForgetPasswordVerifyOTPScreen.name);*/
+
+        Get.toNamed(ForgetPasswordVerifyOTPScreen.name);
+
       } else if (response.responseData!["status"] == "fail"){
         showSnackBarMassage(context, "No User Found");
 

@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:task_manager/data/services/network_caller.dart';
 import 'package:task_manager/data/utils/urls.dart';
@@ -122,8 +123,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 color: AppColors.themeColor,
               ),
               recognizer: TapGestureRecognizer()..onTap = () {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, SignInScreen.name, (value) => false);
+                /*Navigator.pushNamedAndRemoveUntil(
+                      context, SignInScreen.name, (value) => false);*/
+                Get.offAllNamed(SignInScreen.name);
                 },
             ),
           ]),
@@ -142,7 +144,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
       final NetworkResponse response = await NetworkCaller.postRequest(url: Urls.recoverResetPassUrl,body: requestBody);
       if(response.responseData!["status"] == "success"){
-        Navigator.pushReplacementNamed(context, SignInScreen.name);
+        // Navigator.pushReplacementNamed(context, SignInScreen.name);
+        Get.offNamed(SignInScreen.name);
         
       } else if(response.responseData!["status"] == "fail"){
         showSnackBarMassage(context, "Invalid Request!!!!");

@@ -1,11 +1,7 @@
-import 'dart:ffi';
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:task_manager/data/models/user_model.dart';
-import 'package:task_manager/data/services/network_caller.dart';
-import 'package:task_manager/data/utils/urls.dart';
-import 'package:task_manager/ui/controller/auth_controller.dart';
+import 'package:get/get.dart';
+import 'package:task_manager/ui/controller/sign_in_controller.dart';
 import 'package:task_manager/ui/screens/forget_password_verify_email_screen.dart';
 import 'package:task_manager/ui/screens/main_bottom_nav_screen.dart';
 import 'package:task_manager/ui/screens/sign_up_screen.dart';
@@ -27,7 +23,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _emailTEController = TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _signInProgress = false;
+  final SignInController _signInController = Get.find<SignInController>();
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +49,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     controller: _emailTEController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(hintText: "Email"),
-                    validator: (String? value){
-                      if(value?.trim().isEmpty?? true){
+                    validator: (String? value) {
+                      if (value?.trim().isEmpty ?? true) {
                         return "Enter Your Email";
                       }
                     },
@@ -64,32 +60,37 @@ class _SignInScreenState extends State<SignInScreen> {
                     controller: _passwordTEController,
                     obscureText: true,
                     decoration: const InputDecoration(hintText: "Password"),
-                    validator: (String? value){
-                      if(value?.trim().isEmpty?? true){
+                    validator: (String? value) {
+                      if (value?.trim().isEmpty ?? true) {
                         return "Enter Your Password";
                       }
+                      return null;
                     },
                   ),
                   const SizedBox(height: 24),
-                  Visibility(
-                    visible: _signInProgress == false,
-                    replacement: const CenteredCircularProgressBar(),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _onTapSignInButton();
-                      },
-                      child: const Icon(Icons.arrow_circle_right_outlined),
-                    ),
-                  ),
+                  GetBuilder<SignInController>(builder: (controller) {
+                    return Visibility(
+                      visible: controller.inProgress == false,
+                      replacement: const CenteredCircularProgressBar(),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _onTapSignInButton();
+                        },
+                        child: const Icon(Icons.arrow_circle_right_outlined),
+                      ),
+                    );
+                  }),
                   const SizedBox(height: 80),
                   Center(
                     child: Column(
                       children: [
                         TextButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, ForgetPasswordVerifyEmailScreen.name);
+                            // Navigator.pushNamed(context, ForgetPasswordVerifyEmailScreen.name);
+                            Get.toNamed(ForgetPasswordVerifyEmailScreen.name);
                           },
-                          child: const Text("Forget Password",
+                          child: const Text(
+                            "Forget Password",
                             style: TextStyle(
                               color: Colors.grey,
                             ),
@@ -115,51 +116,40 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Future<void> _signIn() async {
-    _signInProgress = true;
-    setState(() {});
-    Map<String,dynamic> requestBody = {
-      "email":_emailTEController.text.trim(),
-      "password":_passwordTEController.text
-    };
-    final NetworkResponse response =
-        await NetworkCaller.postRequest(url: Urls.logIn, body: requestBody);
-    if (response.isSuccess){
-      String token = response.responseData!['token'];
-      UserModel userModel = UserModel.fromJson(response.responseData!['data']);
-      await AuthController.saveUserData(token, userModel);
-      Navigator.pushReplacementNamed(context, MainBottomNavScreen.name);
-    } else {
-      _signInProgress = false;
-      setState(() {
+    bool isSuccess = await _signInController.signIn(
+      _emailTEController.text.trim(),
+      _passwordTEController.text,
+    );
 
-      });
-      if(response.statusCode == 401){
-        showSnackBarMassage(context, "Email or Password not Match");
-      } else {
-        showSnackBarMassage(context, response.errorMassage);
-      }
+    if (isSuccess) {
+      Get.offNamed(MainBottomNavScreen.name);
+    } else {
+      showSnackBarMassage(context, _signInController.errorMassage!);
     }
   }
 
   Widget _buildSignUpSection() {
     return RichText(
       text: TextSpan(
-          text: "Don't have an account? ",
-          style: const TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w400,
-          ),
-          children: [
-            TextSpan(
-              text: "Sign up",
-              style: const TextStyle(
-                color: AppColors.themeColor,
-              ),
-              recognizer: TapGestureRecognizer()..onTap = () {
-                Navigator.pushNamed(context, SignUpScreen.name);
-              },
+        text: "Don't have an account? ",
+        style: const TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.w400,
+        ),
+        children: [
+          TextSpan(
+            text: "Sign up",
+            style: const TextStyle(
+              color: AppColors.themeColor,
             ),
-          ]),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                // Navigator.pushNamed(context, SignUpScreen.name);
+                Get.toNamed(SignUpScreen.name);
+              },
+          ),
+        ],
+      ),
     );
   }
 

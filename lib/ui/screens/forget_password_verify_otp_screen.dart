@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:task_manager/data/services/network_caller.dart';
 import 'package:task_manager/data/utils/urls.dart';
@@ -125,8 +126,9 @@ class _ForgetPasswordVerifyOTPScreenState
               ),
               recognizer: TapGestureRecognizer()
                 ..onTap = () {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, SignInScreen.name, (value) => false);
+                  /*Navigator.pushNamedAndRemoveUntil(
+                      context, SignInScreen.name, (value) => false);*/
+                  Get.offAllNamed(SignInScreen.name);
                 },
             ),
           ]),
@@ -148,7 +150,8 @@ class _ForgetPasswordVerifyOTPScreenState
       );
 
       if(response.responseData!["status"] == "success"){
-        Navigator.pushNamed(context, ResetPasswordScreen.name);
+        // Navigator.pushNamed(context, ResetPasswordScreen.name);
+        Get.toNamed(ResetPasswordScreen.name);
       }
 
       else if (response.responseData!["status"] == "fail"){

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manager/data/services/network_caller.dart';
 import 'package:task_manager/data/utils/urls.dart';
 import 'package:task_manager/ui/controller/auth_controller.dart';
@@ -37,7 +38,8 @@ class TmAppBar extends StatelessWidget implements PreferredSizeWidget {
               child: GestureDetector(
                 onTap: () {
                   if (fromUpdateProfileScreen == false) {
-                    Navigator.pushNamed(context, UpdateProfileScreen.name);
+                    // Navigator.pushNamed(context, UpdateProfileScreen.name);
+                    Get.toNamed(UpdateProfileScreen.name);
                   } return;
 
                 },
@@ -62,7 +64,8 @@ class TmAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               onPressed: () async{
                 await AuthController.clearUserData();
-                Navigator.pushNamedAndRemoveUntil(context, SignInScreen.name, (predicate) => false );
+                // Navigator.pushNamedAndRemoveUntil(context, SignInScreen.name, (predicate) => false );
+                Get.offAllNamed(SignInScreen.name);
               },
               icon: const Icon(Icons.logout_outlined),
             ),

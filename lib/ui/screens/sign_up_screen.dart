@@ -2,6 +2,7 @@ import 'dart:ffi';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manager/data/services/network_caller.dart';
 import 'package:task_manager/data/utils/urls.dart';
 import 'package:task_manager/ui/utils/app_colors.dart';
@@ -163,6 +164,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if(response.isSuccess){
       _clearTextFields();
       showSnackBarMassage(context, "New User Registration Successful");
+      Get.back();
     } else {
       showSnackBarMassage(context, response.errorMassage);
     }
@@ -191,7 +193,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 color: AppColors.themeColor,
               ),
               recognizer: TapGestureRecognizer()..onTap = () {
-                Navigator.pop(context);
+                // Navigator.pop(context);
+                Get.back();
               },
             ),
           ]),

@@ -1,6 +1,7 @@
 import 'dart:core';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manager/data/models/task_model.dart';
 import 'package:task_manager/data/services/network_caller.dart';
 import 'package:task_manager/data/utils/urls.dart';
@@ -97,12 +98,14 @@ class TaskItemWidget extends StatelessWidget {
         actions: [
           TextButton(
               onPressed: (){
-                Navigator.pop(context);
+                // Navigator.pop(context);
+                Get.back();
               },
               child: const Text("Cancel")),
           ElevatedButton(
               onPressed: () async{
-                Navigator.pop(context);
+                // Navigator.pop(context);
+                Get.back();
                 await _editTaskStatus(selectedStatus,context);
               },
               child: const Text("Save")),
@@ -130,14 +133,16 @@ class TaskItemWidget extends StatelessWidget {
         actions: [
           TextButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  // Navigator.pop(context);
+                  Get.back();
                 },
                 child: const Text("No"),
               ),
           TextButton(
             onPressed: () {
               _deleteTask(context);
-              Navigator.pop(context);
+              // Navigator.pop(context);
+              Get.back();
             },
             child: const Text("Yes",style: TextStyle(color: Colors.red),),
           ),
