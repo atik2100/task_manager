@@ -1,8 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:task_manager/data/services/network_caller.dart';
-import 'package:task_manager/data/utils/urls.dart';
+import 'package:task_manager/ui/controller/forget_password_verify_email_controller.dart';
 import 'package:task_manager/ui/screens/forget_password_verify_otp_screen.dart';
 import 'package:task_manager/ui/utils/app_colors.dart';
 import 'package:task_manager/ui/utils/global_string.dart';
@@ -15,15 +14,18 @@ class ForgetPasswordVerifyEmailScreen extends StatefulWidget {
 
   static const String name = '/forget_password/verify_email';
 
-
   @override
-  State<ForgetPasswordVerifyEmailScreen> createState() => _ForgetPasswordVerifyEmailScreenState();
+  State<ForgetPasswordVerifyEmailScreen> createState() =>
+      _ForgetPasswordVerifyEmailScreenState();
 }
 
-class _ForgetPasswordVerifyEmailScreenState extends State<ForgetPasswordVerifyEmailScreen> {
+class _ForgetPasswordVerifyEmailScreenState
+    extends State<ForgetPasswordVerifyEmailScreen> {
   final TextEditingController _emailTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _forgetPasswordVerifyEmailInProgress = false;
+  final ForgetPasswordVerifyEmailController
+      _forgetPasswordVerifyEmailController =
+      Get.find<ForgetPasswordVerifyEmailController>();
 
   @override
   Widget build(BuildContext context) {
@@ -54,28 +56,27 @@ class _ForgetPasswordVerifyEmailScreenState extends State<ForgetPasswordVerifyEm
                     controller: _emailTEController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(hintText: "Email"),
-                    validator: (String? value){
+                    validator: (String? value) {
                       if (value?.trim().isEmpty ?? true) {
                         return "Enter Your Email Address";
                       }
                       return null;
                     },
                   ),
-
                   const SizedBox(height: 24),
-                  Visibility(
-                    visible: _forgetPasswordVerifyEmailInProgress == false,
-                    replacement: const CenteredCircularProgressBar(),
-                    child: ElevatedButton(
-                      onPressed: () {
-
-
-
-                        _verifyEmail();
-
-                      },
-                      child: const Icon(Icons.arrow_circle_right_outlined),
-                    ),
+                  GetBuilder<ForgetPasswordVerifyEmailController>(
+                    builder: (controller) {
+                      return Visibility(
+                        visible: controller.inProgress == false,
+                        replacement: const CenteredCircularProgressBar(),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _onTapVerifyEmailButton();
+                          },
+                          child: const Icon(Icons.arrow_circle_right_outlined),
+                        ),
+                      );
+                    }
                   ),
                   const SizedBox(height: 48),
                   Center(
@@ -104,42 +105,36 @@ class _ForgetPasswordVerifyEmailScreenState extends State<ForgetPasswordVerifyEm
               style: const TextStyle(
                 color: AppColors.themeColor,
               ),
-              recognizer: TapGestureRecognizer()..onTap = () {
-                // Navigator.pop(context);
-                Get.back();
-              },
+              recognizer: TapGestureRecognizer()
+                ..onTap = () {
+                  // Navigator.pop(context);
+                  Get.back();
+                },
             ),
           ]),
     );
   }
 
-  Future<void> _verifyEmail() async {
-    if(_formKey.currentState!.validate()){
-      _forgetPasswordVerifyEmailInProgress = true;
-      setState(() { });
-
-      GlobalString.email = _emailTEController.text;
-
-      final NetworkResponse response = await NetworkCaller.getRequest(url: Urls.recoverVerifyEmailUrl(GlobalString.email));
-      if(response.responseData!["status"] == "success"){
-        showSnackBarMassage(context, "Please Check Your Email!");
-        /*Navigator.pushNamed(
-            context, ForgetPasswordVerifyOTPScreen.name);*/
-
-        Get.toNamed(ForgetPasswordVerifyOTPScreen.name);
-
-      } else if (response.responseData!["status"] == "fail"){
-        showSnackBarMassage(context, "No User Found");
-
-      } else{
-        showSnackBarMassage(context, response.errorMassage);
-      }
-
-      _forgetPasswordVerifyEmailInProgress = false;
-      setState(() { });
-
+  void _onTapVerifyEmailButton() {
+    if (_formKey.currentState!.validate()) {
+      _verifyEmail();
     }
+  }
 
+  Future<void> _verifyEmail() async {
+    bool isSuccess = await _forgetPasswordVerifyEmailController
+        .verifyEmail(_emailTEController.text.trim());
+
+    GlobalString.email = _emailTEController.text;
+
+    if (isSuccess) {
+      Get.toNamed(ForgetPasswordVerifyOTPScreen.name);
+    } else {
+      showSnackBarMassage(
+          context,
+          _forgetPasswordVerifyEmailController.failMassage ??
+              _forgetPasswordVerifyEmailController.errorMassage!);
+    }
   }
 
   @override

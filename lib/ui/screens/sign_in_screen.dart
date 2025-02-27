@@ -116,6 +116,7 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Future<void> _signIn() async {
+    print("🟡 Attempting sign-in...");
     bool isSuccess = await _signInController.signIn(
       _emailTEController.text.trim(),
       _passwordTEController.text,

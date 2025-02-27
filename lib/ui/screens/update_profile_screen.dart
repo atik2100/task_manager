@@ -1,10 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:task_manager/data/services/network_caller.dart';
-import 'package:task_manager/data/utils/urls.dart';
 import 'package:task_manager/ui/controller/auth_controller.dart';
+import 'package:task_manager/ui/controller/update_profile_controller.dart';
 import 'package:task_manager/ui/widgets/background.dart';
 import 'package:task_manager/ui/widgets/centered_circular_progress_bar.dart';
 import 'package:task_manager/ui/widgets/snack_bar_massege.dart';
@@ -27,7 +25,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   XFile? _pickedImage;
-  bool _updateProfileInProgress = false;
+  final UpdateProfileController _updateProfileController =
+      Get.find<UpdateProfileController>();
 
   @override
   void initState() {
@@ -73,7 +72,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                     controller: _firstNameTEController,
                     keyboardType: TextInputType.name,
                     decoration: const InputDecoration(hintText: "First Name"),
-                    validator: (String? value){
+                    validator: (String? value) {
                       if (value?.trim().isEmpty ?? true) {
                         return "Enter Your First Name";
                       }
@@ -85,7 +84,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                     controller: _lastNameTEController,
                     keyboardType: TextInputType.name,
                     decoration: const InputDecoration(hintText: "Last Name"),
-                    validator: (String? value){
+                    validator: (String? value) {
                       if (value?.trim().isEmpty ?? true) {
                         return "Enter Your Last Name";
                       }
@@ -97,7 +96,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                     controller: _mobileTEController,
                     keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(hintText: "Mobile"),
-                    validator: (String? value){
+                    validator: (String? value) {
                       if (value?.trim().isEmpty ?? true) {
                         return "Enter Your Mobile Number";
                       }
@@ -111,16 +110,18 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                     decoration: const InputDecoration(hintText: "Password"),
                   ),
                   const SizedBox(height: 24),
-                  Visibility(
-                    visible: _updateProfileInProgress == false,
-                    replacement: const CenteredCircularProgressBar(),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _onTapUpdateButton();
-                      },
-                      child: const Icon(Icons.arrow_circle_right_outlined),
-                    ),
-                  ),
+                  GetBuilder<UpdateProfileController>(builder: (controller) {
+                    return Visibility(
+                      visible: controller.inProgress == false,
+                      replacement: const CenteredCircularProgressBar(),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _onTapUpdateButton();
+                        },
+                        child: const Icon(Icons.arrow_circle_right_outlined),
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
@@ -174,44 +175,27 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   }
 
   void _onTapUpdateButton() {
-    if (_formKey.currentState!.validate()){
+    if (_formKey.currentState!.validate()) {
       _updateProfile();
     }
   }
 
-  Future<void> _updateProfile() async{
+  Future<void> _updateProfile() async {
+    bool isSuccess = await _updateProfileController.updateProfile(
+        _emailTEController.text.trim(),
+        _firstNameTEController.text.trim(),
+        _lastNameTEController.text.trim(),
+        _mobileTEController.text.trim(),
+        _passwordTEController.text,
+        _pickedImage);
 
-    _updateProfileInProgress = true;
-    setState(() { });
-
-    Map<String, dynamic> requestBody = {
-      "email":_emailTEController.text.trim(),
-      "firstName":_firstNameTEController.text.trim(),
-      "lastName":_lastNameTEController.text.trim(),
-      "mobile":_mobileTEController.text.trim(),
-    };
-
-    if (_pickedImage != null){
-      List<int> imageBytes = await _pickedImage!.readAsBytes();
-      requestBody["photo"] = base64Encode(imageBytes);
-    }
-
-    if (_passwordTEController.text.isNotEmpty){
-      requestBody["password"] = _passwordTEController.text;
-    }
-    
-    final NetworkResponse response = await NetworkCaller.postRequest(url: Urls.updateProfileUrl, body: requestBody);
-
-    if(response.isSuccess){
+    if (isSuccess) {
       _passwordTEController.clear();
-      showSnackBarMassage(context, "Your Profile Updated!!");
+      showSnackBarMassage(context, _updateProfileController.successMassage!);
+      Get.back();
     } else {
-      showSnackBarMassage(context, response.errorMassage);
+      showSnackBarMassage(context, _updateProfileController.errorMassage!);
     }
-
-    _updateProfileInProgress = false;
-    setState(() { });
-
   }
 
   @override

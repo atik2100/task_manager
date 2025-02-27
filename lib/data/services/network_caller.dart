@@ -103,6 +103,6 @@ class NetworkCaller {
     _isLogOut = true;
     await AuthController.clearUserData();
     Navigator.pushNamedAndRemoveUntil(TaskManager.navigatorKey.currentContext!, SignInScreen.name, (predicate)=>false);
-    // Get.offAllNamed(SignInScreen.name);
+
   }
 }
